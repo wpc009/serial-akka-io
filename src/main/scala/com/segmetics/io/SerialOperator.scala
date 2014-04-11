@@ -1,14 +1,14 @@
 package com.segmetics.io
 
 import purejavacomm.{SerialPortEvent, SerialPortEventListener, SerialPort}
-import akka.actor.{Props, Actor, ActorRef}
+import akka.actor.{ActorLogging, Props, Actor, ActorRef}
 import com.segmetics.io.Serial._
 import akka.util.ByteStringBuilder
 
 /**
  * Created by wysa on 14-3-26.
  */
-private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor {
+private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor with ActorLogging{
   private object DataAvailable
 
   context.watch(commander) //death pact
@@ -22,21 +22,31 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
     val toNotify = self
     port.addEventListener(new SerialPortEventListener() {
       override def serialEvent(event: SerialPortEvent) {
-        toNotify ! DataAvailable
+
+        import purejavacomm.SerialPortEvent
+        event.getEventType match {
+          case SerialPortEvent.DATA_AVAILABLE=>
+            toNotify ! DataAvailable
+          //case SerialPortEvent.PE =>
+          //case SerialPortEvent.OE =>
+          case _ =>
+            log.debug(s"got unhandled serial event type ${event.getEventType}")
+        }
+
       }
     })
     self ! DataAvailable //just in case
   }
 
   override def postStop = {
-    commander ! Closed
+    commander ! ConfirmedClose
     port.close
   }
 
   override def receive = {
     case Close =>
       port.close
-      if (sender != commander) sender ! Closed
+      if (sender != commander) sender ! ConfirmedClose
       context.stop(self)
 
     case Write(data, ack) =>

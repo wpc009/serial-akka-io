@@ -41,8 +41,8 @@ class Example(port: String) extends Actor with Stash {
       print("Received data from serial port: ")
       println(data.decodeString("UTF-8"))
 
-    case Closed =>
-      println("Serial port closed")
+    case event:Closed =>
+      println(s" ${event.getClass} Serial port closed")
       context stop self
   }
 }

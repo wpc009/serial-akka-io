@@ -53,6 +53,8 @@ private[io] class SerialManager extends Actor{
             sp
           case _ => throw new RuntimeException(s"$port is not a SerialPort.")
         }
+
+
       } match {
         case Success(serialPort) =>
           val operator = context.actorOf(SerialOperator.props(serialPort, sender))

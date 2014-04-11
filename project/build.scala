@@ -7,14 +7,14 @@ object SegmetricsBuild extends Build {
 
   lazy val copyDependencies = TaskKey[Unit]("copy-deps")
 
-  lazy val deployTask = InputKey[Unit]("deploy","Deploy binary to server")
+  lazy val deployTask = InputKey[Unit]("deploy", "Deploy binary to server")
 
-  case class Profile(identityFile:File,user:String,host:String,src:File,dst:File)
+  case class Profile(identityFile: File, user: String, host: String, src: File, dst: File)
 
 
-  def deploy(p:Profile,log:Logger) ={
-    scp(log,p.identityFile,p.user,p.host,p.src,p.dst)
-  } 
+  def deploy(p: Profile, log: Logger) = {
+    scp(log, p.identityFile, p.user, p.host, p.src, p.dst)
+  }
 
   def ssh(log: Logger, identityFile: File, user: String, host: String, commands: String*) {
     val chain = commands(0) + commands.toList.tail.foldLeft("")(_ + " && " + _)
@@ -50,11 +50,11 @@ object SegmetricsBuild extends Build {
   }
 
   val common_settings = Project.defaultSettings ++ Seq(
-    name := "Test",
-    organization := "segmetics.com",
-    version := "0.1.0",
+    name := "serial-akka-io",
+    organization := "com.segmetics",
+    version := "0.1.1",
     exportJars := true,
-	scalacOptions ++= Seq("-target:jvm-1.7", "-feature", "-g:none", "-optimise"),
+    scalacOptions ++= Seq("-target:jvm-1.7", "-feature", "-g:none", "-optimise"),
     //    resolvers += "secmon proxy" at "http://nexus.innoxyz.com/nexus/content/groups/ivyGroup/",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.2.3",
@@ -62,15 +62,18 @@ object SegmetricsBuild extends Build {
       "ch.qos.logback" % "logback-classic" % "1.0.13",
       "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
       "org.scalatest" % "scalatest_2.10" % "2.1.0" % "test"
-)
-);
+    )
+  );
 
-lazy val project = Project(
-  id = "serial-akka-io",
-  base = file("."),
-  settings = common_settings ++ packSettings ++ Seq(
-
+  val publish_settings = Seq(
+    publishTo := Some("artifactory.segmetics.com-releases" at "http://artifactory.segmetics.com/artifactory/libs-release-local"),
+    credentials += Credentials("Artifactory Realm","artifactory.segmetics.com","deploy","5jtuDeploy")
   )
-)
+
+  lazy val project = Project(
+    id = "serial-akka-io",
+    base = file("."),
+    settings = common_settings ++ packSettings ++ publish_settings
+  )
 
 }

@@ -10,7 +10,6 @@ import akka.util.ByteString
 import scala.language.postfixOps
 
 class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
-  with BeforeAndAfterAll
   with FlatSpecLike
   with Matchers
   with ImplicitSender {
@@ -43,7 +42,5 @@ class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
         false
     }
   }
-
-  override protected def afterAll(): Unit = system.shutdown()
 
 }

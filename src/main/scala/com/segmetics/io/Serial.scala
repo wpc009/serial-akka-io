@@ -80,7 +80,19 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider{
   case object Close extends OperatorCommand
 
   /** The port was closed. Either by request or by an external event (i.e. unplugging) */
-  case object Closed extends Event
+  sealed trait Closed extends Event
+
+  /**
+   * Closed on request
+   */
+  case object ConfirmedClose extends Closed
+
+  /**
+   * Closed by external events
+   */
+  case object ExceptionClose extends Closed
+
+
 
   /** Data was received on the serial port. */
   case class Received(data: ByteString) extends Event
