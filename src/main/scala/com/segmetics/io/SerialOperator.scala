@@ -3,7 +3,8 @@ package com.segmetics.io
 import purejavacomm.{SerialPortEvent, SerialPortEventListener, SerialPort}
 import akka.actor.{ActorLogging, Props, Actor, ActorRef}
 import com.segmetics.io.Serial._
-import akka.util.ByteStringBuilder
+import akka.util.{ByteString, ByteStringBuilder}
+import scala.annotation.tailrec
 
 /**
  * Created by wysa on 14-3-26.
@@ -16,29 +17,46 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
   val out = port.getOutputStream
   val in = port.getInputStream
 
-  override def preStart = {
+ // override def preStart = {
     port.notifyOnDataAvailable(true)
     port.enableReceiveTimeout(1)
     val toNotify = self
     port.addEventListener(new SerialPortEventListener() {
-      override def serialEvent(event: SerialPortEvent) {
 
+      private def read() = {
+        val bsb = new ByteStringBuilder
+        val buf = Array.ofDim[Byte](64)
+        @tailrec
+        def doRead() {
+          val count = in.read(buf,0,64)
+          if (count > 0) {
+            bsb ++= buf.slice(0,count-1)
+            doRead
+          }
+        }
+        doRead()
+        bsb.result
+      }
+
+      override def serialEvent(event: SerialPortEvent) {
+        println(s"got serial event $event")
         import purejavacomm.SerialPortEvent
         event.getEventType match {
           case SerialPortEvent.DATA_AVAILABLE=>
-            toNotify ! DataAvailable
+            toNotify ! read()
           //case SerialPortEvent.PE =>
           //case SerialPortEvent.OE =>
           case _ =>
-            log.debug(s"got unhandled serial event type ${event.getEventType}")
+            log.error(s"got unhandled serial event type ${event.getEventType}")
         }
 
       }
     })
     self ! DataAvailable //just in case
-  }
+ // }
 
   override def postStop = {
+    log.info(s"serialport ${port} close")
     commander ! ConfirmedClose
     port.close
   }
@@ -54,23 +72,11 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
       out.flush
       if (ack != NoAck) sender ! ack
 
-    case DataAvailable =>
-      val data = read()
+    case data:ByteString =>
       if (data.nonEmpty) commander ! Received(data)
   }
 
-  private def read() = {
-    val bsb = new ByteStringBuilder
-    def doRead() {
-      val data = in.read()
-      if (data != -1) {
-        bsb += data.toByte
-        doRead
-      }
-    }
-    doRead()
-    bsb.result
-  }
+
 }
 private[io] object SerialOperator {
   def props(port: SerialPort, commander: ActorRef) = Props(classOf[SerialOperator],port,commander)
