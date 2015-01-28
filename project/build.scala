@@ -11,6 +11,7 @@ object SegmetricsBuild extends Build {
 
   case class Profile(identityFile: File, user: String, host: String, src: File, dst: File)
 
+  val akka = "2.3.4"
 
   def deploy(p: Profile, log: Logger) = {
     scp(log, p.identityFile, p.user, p.host, p.src, p.dst)
@@ -49,20 +50,22 @@ object SegmetricsBuild extends Build {
 
   }
 
+
   val common_settings = Project.defaultSettings ++ Seq(
     name := "serial-akka-io",
     organization := "com.segmetics",
-    version := "0.1.3",
+    version := "0.1.6",
+    scalaVersion := "2.10.4",
     exportJars := true,
     scalacOptions ++= Seq("-target:jvm-1.7", "-feature", "-g:none", "-optimise"),
     //    resolvers += "secmon proxy" at "http://nexus.innoxyz.com/nexus/content/groups/ivyGroup/",
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-actor" % "2.2.3",
-      "com.typesafe.akka" %% "akka-slf4j" % "2.2.3",
+      "com.typesafe.akka" %% "akka-actor" % akka,
+      "com.typesafe.akka" %% "akka-slf4j" % akka,
       "ch.qos.logback" % "logback-classic" % "1.0.13",
       "com.sparetimelabs" % "purejavacomm" % "0.0.21",
       "net.java.dev.jna" % "jna" % "4.1.0",
-      "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
+      "com.typesafe.akka" %% "akka-testkit" % akka % "test",
       "org.scalatest" % "scalatest_2.10" % "2.1.0" % "test"
     )
   );

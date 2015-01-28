@@ -54,11 +54,11 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider{
   object XonXoffFlowControl extends FlowControl
 
   /** Open a serial port. Response: Opened | CommandFailed */
-  case class Open(port: String, baudRate: Int,
-                  dataBits: DataBits = DataBits8,
-                  parity: Parity = NoParity,
-                  stopBits: StopBits = OneStopBit,
-                  flowControl: FlowControl = NoFlowControl) extends ManagerCommand
+  case class Open(port: String, baudRate: Option[Int] = None,
+                  dataBits: Option[DataBits] = None,
+                  parity: Option[Parity] = None,
+                  stopBits: Option[StopBits] = None,
+                  flowControl: Option[FlowControl] = None) extends ManagerCommand
 
   /**
    *  Serial port is now open.

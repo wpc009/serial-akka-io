@@ -29,17 +29,18 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
         @tailrec
         def doRead() {
           val count = in.read(buf,0,64)
+          log.debug("read count {}",count)
           if (count > 0) {
-            bsb ++= buf.slice(0,count-1)
-            doRead
+            bsb ++= buf.slice(0,count)
+            doRead()
           }
         }
         doRead()
-        bsb.result
+        bsb.result()
       }
 
       override def serialEvent(event: SerialPortEvent) {
-        println(s"got serial event $event")
+        log.debug(s"got serial event $event")
         import purejavacomm.SerialPortEvent
         event.getEventType match {
           case SerialPortEvent.DATA_AVAILABLE=>
@@ -58,21 +59,22 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
   override def postStop = {
     log.info(s"serialport ${port} close")
     commander ! ConfirmedClose
-    port.close
+    port.close()
   }
 
   override def receive = {
     case Close =>
-      port.close
+      port.close()
       if (sender != commander) sender ! ConfirmedClose
       context.stop(self)
 
     case Write(data, ack) =>
       out.write(data.toArray)
-      out.flush
+      out.flush()
       if (ack != NoAck) sender ! ack
 
     case data:ByteString =>
+      log.debug("got input {}",data)
       if (data.nonEmpty) commander ! Received(data)
   }
 
