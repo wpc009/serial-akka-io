@@ -10,7 +10,7 @@ class Example(port: String) extends Actor with Stash {
   import context.system
 
   override def preStart = {
-    IO(Serial) ! Open(port, 9600)
+    IO(Serial) ! Open(port, Some(9600))
   }
 
   override def postStop = {

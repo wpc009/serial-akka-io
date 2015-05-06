@@ -8,6 +8,7 @@ import Serial._
 import scala.concurrent.duration._
 import akka.util.ByteString
 import scala.language.postfixOps
+import akka.event.slf4j.Slf4jLogger
 
 class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
   with FlatSpecLike
@@ -26,7 +27,7 @@ class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
 
   "[Serial] echo test " should "echo back" in {
     val echoWorlds = ByteString("Hello World")
-    IO(Serial) ! Open("/dev/ttyUSB0",9600,DataBits8,NoParity,OneStopBit,NoFlowControl)
+    IO(Serial) ! Open("/dev/ttyUSB0",Some(9600),Some(DataBits8),Some(NoParity),Some(OneStopBit),Some(NoFlowControl))
     expectMsgPF(1 seconds){
       case Opened(op,_) =>
         op ! Write(echoWorlds)
