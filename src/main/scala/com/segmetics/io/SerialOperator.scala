@@ -17,33 +17,55 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
   val out = port.getOutputStream
   val in = port.getInputStream
 
+
  // override def preStart = {
     port.notifyOnDataAvailable(true)
+    port.setInputBufferSize(64)
     port.enableReceiveTimeout(1)
+
     val toNotify = self
     port.addEventListener(new SerialPortEventListener() {
+      var pt = 0
 
       private def read() = {
         val bsb = new ByteStringBuilder
         val buf = Array.ofDim[Byte](64)
         @tailrec
         def doRead() {
-          val count = in.read(buf,0,64)
-          log.debug("read count {}",count)
-          if (count > 0) {
-            bsb ++= buf.slice(0,count)
-            doRead()
+//          if(pt <64) {
+//            val count = in.read(buf, pt, 64 - pt)
+            val count = in.read(buf,0,64)
+            log.debug("read count {}",count)
+            if (count > 0) {
+//              log.debug("receive -> {}", buf.slice(0, count).foldLeft(new StringBuilder) { (builder, byte) =>
+//                builder.append("0x%02X ".format(byte))
+//                builder
+//              }.result())
+//              pt = pt + count
+              bsb ++= buf.slice(0,count)
+              doRead()
+//            }else{
+//              bsb ++= buf.slice(0,pt)
+//              pt=0
+//            }
+//          }else {
+//            bsb ++= buf.slice(0,pt)
+//            pt=0
           }
         }
         doRead()
-        bsb.result()
+        val res = bsb.result()
+        log.debug("get raw {}",res)
+        res
       }
 
       override def serialEvent(event: SerialPortEvent) {
         log.debug(s"got serial event $event")
         import purejavacomm.SerialPortEvent
+        log.debug("event type {}",event.getEventType)
         event.getEventType match {
           case SerialPortEvent.DATA_AVAILABLE=>
+//            log.debug("doRead")
             toNotify ! read()
           //case SerialPortEvent.PE =>
           //case SerialPortEvent.OE =>

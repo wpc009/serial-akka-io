@@ -54,7 +54,7 @@ object SegmetricsBuild extends Build {
   val common_settings = Project.defaultSettings ++ Seq(
     name := "serial-akka-io",
     organization := "com.segmetics",
-    version := "0.1.8",
+    version := "0.1.9-SNAPSHOT",
     crossScalaVersions := Seq("2.10.5","2.11.6"),
     scalaVersion := "2.10.5",
     exportJars := true,
@@ -64,7 +64,8 @@ object SegmetricsBuild extends Build {
       "com.typesafe.akka" %% "akka-actor" % akka,
       "com.typesafe.akka" %% "akka-slf4j" % akka % "provided",
       "ch.qos.logback" % "logback-classic" % "1.0.13" % "provided",
-      "com.sparetimelabs" % "purejavacomm" % "seg_0.0.22",
+      "com.sparetimelabs" % "purejavacomm" % "seg_0.0.23",
+      "net.java.dev.jna" % "jna" % "4.1.0",
 //      "net.java.dev.jna" % "jna" % "4.0.0" % "provided",
 //      "net.java.dev.jna" % "jna-platform" % "4.0.0" % "provided",
       "com.typesafe.akka" %% "akka-testkit" % akka % "test",
@@ -73,7 +74,12 @@ object SegmetricsBuild extends Build {
   );
 
   val publish_settings = Seq(
-    publishTo := Some("artifactory.segmetics.com-releases" at "http://artifactory.segmetics.com/artifactory/libs-release-local"),
+    publishTo := {
+      if(isSnapshot.value)
+        Some("snapshots" at "http://artifactory.segmetics.com/artifactory/libs-snapshot-local")
+      else
+        Some("artifactory.segmetics.com-releases" at "http://artifactory.segmetics.com/artifactory/libs-release-local")
+    },
     credentials += Credentials("Artifactory Realm","artifactory.segmetics.com","deploy","5jtuDeploy")
   )
 

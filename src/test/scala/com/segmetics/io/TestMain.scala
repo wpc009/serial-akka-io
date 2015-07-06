@@ -5,4 +5,7 @@ package com.segmetics.io
  */
 object TestMain {
 
+  def main(args: Array[String]): Unit = {
+
+  }
 }

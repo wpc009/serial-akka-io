@@ -2,7 +2,7 @@ package com.segmetics.io
 
 import akka.actor.{ ActorLogging,Actor}
 import com.segmetics.io.Serial._
-import purejavacomm.{SerialPort, CommPortIdentifier}
+import purejavacomm.{PureJavaSerialPort, SerialPort, CommPortIdentifier}
 import scala.collection.mutable.ArrayBuffer
 import com.segmetics.io.Serial.Open
 import scala.util.{Try,Success,Failure}
@@ -47,12 +47,16 @@ private[io] class SerialManager extends Actor with ActorLogging{
           case XonXoffFlowControl => FLOWCONTROL_XONXOFF_IN | FLOWCONTROL_XONXOFF_OUT
         }
         id.open(context.self.toString, 2000) match {
-          case sp: SerialPort =>
+          case sp: PureJavaSerialPort =>
             log.debug("open port {} succeed, settings params",port)
             if(baudRate.nonEmpty&&data.nonEmpty&&stop.nonEmpty&&par.nonEmpty){
               sp.setSerialPortParams(baudRate.get, data.get, stop.get, par.get) 
             }
             // sp.setSerialPortParams(baudRate, data, stop, par)
+            sp.notifyOnBreakInterrupt(true)
+            sp.enableReceiveTimeout(50)
+
+//            sp.enableReceiveFraming(50)
             if(fc.nonEmpty){
               sp.setFlowControlMode(fc.get)
             }            
@@ -63,7 +67,7 @@ private[io] class SerialManager extends Actor with ActorLogging{
 
       } match {
         case Success(serialPort) =>
-          val operator = context.actorOf(SerialOperator.props(serialPort, sender))
+          val operator = context.actorOf(SerialOperator.props(serialPort, sender()))
           sender ! Opened(operator, port)
         case Failure(error) =>
           sender ! CommandFailed(c, error)
