@@ -1,5 +1,6 @@
 package com.segmetics.io
 
+import com.maxtropy.util.logging.akka.FActorLogging
 import purejavacomm.{SerialPortEvent, SerialPortEventListener, SerialPort}
 import akka.actor.{ActorLogging, Props, Actor, ActorRef}
 import com.segmetics.io.Serial._
@@ -9,7 +10,7 @@ import scala.annotation.tailrec
 /**
  * Created by wysa on 14-3-26.
  */
-private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor with ActorLogging{
+private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor with FActorLogging{
   private object DataAvailable
 
   context.watch(commander) //death pact
@@ -55,7 +56,7 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
         }
         doRead()
         val res = bsb.result()
-        log.debug("get raw {}",res)
+//        log.debug("get raw {}",res)
         res
       }
 
@@ -96,7 +97,7 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
       if (ack != NoAck) sender ! ack
 
     case data:ByteString =>
-      log.debug("got input {}",data)
+//      log.debug("got input {}",data)
       if (data.nonEmpty) commander ! Received(data)
   }
 
