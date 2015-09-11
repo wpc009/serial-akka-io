@@ -1,7 +1,11 @@
+import sbtbuildinfo.BuildInfoPlugin._
+import sbtbuildinfo.{BuildInfoOption, BuildInfoKeys, BuildInfoPlugin}
+import com.typesafe.sbt.GitBranchPrompt
+import com.typesafe.sbt.GitVersioning
+import com.typesafe.sbt.SbtGit.{GitKeys, git}
+import com.typesafe.sbt.git.DefaultReadableGit
 import sbt._
 import sbt.Keys._
-import scala.Some
-import xerial.sbt.Pack._
 
 object SegmetricsBuild extends Build {
 
@@ -51,42 +55,52 @@ object SegmetricsBuild extends Build {
   }
 
 
-  val common_settings = Project.defaultSettings ++ Seq(
+  val common_settings = Seq(
     name := "serial-akka-io",
     organization := "com.segmetics",
-    version := "0.1.9-SNAPSHOT",
-    crossScalaVersions := Seq("2.10.5","2.11.6"),
-    scalaVersion := "2.10.5",
+//    version := "0.2.2-SNAPSHOT",
+    //    crossScalaVersions := Seq("2.10.5","2.11.6"),
+    scalaVersion in ThisBuild := "2.11.6",
     exportJars := true,
     scalacOptions ++= Seq("-target:jvm-1.7", "-feature", "-g:none", "-optimise"),
+    git.useGitDescribe := true,
+    GitKeys.gitReader in ThisBuild <<= baseDirectory(base => new DefaultReadableGit(base)),
+    sourceManaged <<= (baseDirectory in ThisProject) ( base => base / "src_managed" ),
+    BuildInfoKeys.buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion,BuildInfoKeys.buildInfoBuildNumber),
+    BuildInfoKeys.buildInfoOptions += BuildInfoOption.BuildTime,
+    BuildInfoKeys.buildInfoPackage := organization.value + ".buildinfo." + name.value.replaceAll("[-_.]",""),
     //    resolvers += "secmon proxy" at "http://nexus.innoxyz.com/nexus/content/groups/ivyGroup/",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akka,
-      "com.typesafe.akka" %% "akka-slf4j" % akka % "provided",
-      "ch.qos.logback" % "logback-classic" % "1.0.13" % "provided",
+      "com.typesafe.akka" %% "akka-slf4j" % akka % Provided,
+      "ch.qos.logback" % "logback-classic" % "1.0.13" % Provided,
+      "com.maxtropy" %% "maxtropy-logging" % "0.2.2-Alpha" changing(),
       "com.sparetimelabs" % "purejavacomm" % "seg_0.0.23",
       "net.java.dev.jna" % "jna" % "4.1.0",
-//      "net.java.dev.jna" % "jna" % "4.0.0" % "provided",
-//      "net.java.dev.jna" % "jna-platform" % "4.0.0" % "provided",
-      "com.typesafe.akka" %% "akka-testkit" % akka % "test",
-      "org.scalatest" % "scalatest_2.10" % "2.1.0" % "test"
+      //      "net.java.dev.jna" % "jna" % "4.0.0" % "provided",
+      //      "net.java.dev.jna" % "jna-platform" % "4.0.0" % "provided",
+      "com.typesafe.akka" %% "akka-testkit" % akka % Test,
+      "org.scalatest" %% "scalatest" % "3.0.0-M8" % Test
     )
-  );
+  )
 
   val publish_settings = Seq(
     publishTo := {
-      if(isSnapshot.value)
+      if (isSnapshot.value)
         Some("snapshots" at "http://artifactory.segmetics.com/artifactory/libs-snapshot-local")
       else
         Some("artifactory.segmetics.com-releases" at "http://artifactory.segmetics.com/artifactory/libs-release-local")
     },
-    credentials += Credentials("Artifactory Realm","artifactory.segmetics.com","deploy","5jtuDeploy")
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
   )
 
   lazy val project = Project(
     id = "serial-akka-io",
-    base = file("."),
-    settings = common_settings ++ packSettings ++ publish_settings
+    base = file(".")
   )
+    .enablePlugins(GitVersioning, GitBranchPrompt, BuildInfoPlugin)
+    .settings(common_settings: _*)
+    .settings(publish_settings: _*)
+  //    .enablePlugins(GitVersioning,GitBranchPromt)
 
 }
