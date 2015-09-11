@@ -35,3 +35,5 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 .idea*
+
+buildinfo.properties
