@@ -1,10 +1,10 @@
 import sbtbuildinfo.BuildInfoPlugin._
-import sbtbuildinfo.{BuildInfoOption, BuildInfoKeys, BuildInfoPlugin}
+import sbtbuildinfo.{BuildInfoKeys, BuildInfoOption, BuildInfoPlugin}
 import com.typesafe.sbt.GitBranchPrompt
 import com.typesafe.sbt.GitVersioning
 import com.typesafe.sbt.SbtGit.{GitKeys, git}
 import com.typesafe.sbt.git.DefaultReadableGit
-import sbt._
+import sbt.{Credentials, _}
 import sbt.Keys._
 
 object SegmetricsBuild extends Build {
@@ -70,11 +70,17 @@ object SegmetricsBuild extends Build {
     BuildInfoKeys.buildInfoOptions += BuildInfoOption.BuildTime,
     BuildInfoKeys.buildInfoPackage := organization.value + ".buildinfo." + name.value.replaceAll("[-_.]",""),
     //    resolvers += "secmon proxy" at "http://nexus.innoxyz.com/nexus/content/groups/ivyGroup/",
+    resolvers ++= Seq(
+      "labs repository" at "http://www.sparetimelabs.com/maven2",
+      "snapshots" at "http://artifactory.segmetics.com/artifactory/libs-snapshot-local",
+      "releases" at "http://artifactory.segmetics.com/artifactory/libs-release-local"
+    ),
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akka,
       "com.typesafe.akka" %% "akka-slf4j" % akka % Provided,
       "ch.qos.logback" % "logback-classic" % "1.0.13" % Provided,
-      "com.maxtropy" %% "maxtropy-logging" % "0.2.2-Alpha" changing(),
+//      "com.maxtropy" %% "maxtropy-logging" % "0.2.3-Alpha" changing(),
       "com.sparetimelabs" % "purejavacomm" % "seg_0.0.23",
       "net.java.dev.jna" % "jna" % "4.1.0",
       //      "net.java.dev.jna" % "jna" % "4.0.0" % "provided",
