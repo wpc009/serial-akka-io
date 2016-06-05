@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 /**
  * Created by wysa on 14-3-26.
  */
-private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor with ActorLogging{
+private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends Actor with ActorLogging {
   private object DataAvailable
 
   context.watch(commander) //death pact
