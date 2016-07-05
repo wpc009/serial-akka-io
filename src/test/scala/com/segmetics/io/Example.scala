@@ -48,7 +48,8 @@ class Example(port: String) extends Actor with Stash {
 }
 
 object Example extends App {
-  val port = "COM4"
+//  val port = "COM4"
+  val port = "/dev/tty.usbserial-FTZAUKLC"
 
   val system = ActorSystem("Example")
   val actor = system.actorOf(Props(classOf[Example],port), "e1")
@@ -58,7 +59,7 @@ object Example extends App {
   // actor
   actor ! "Hi from the computer"
   Thread.sleep(2000)
-  actor ! "close"
+//  actor ! "close"
 
   system.awaitTermination
 }

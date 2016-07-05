@@ -129,14 +129,12 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
     * Java API
     * @param port
     * @param baudRate
-    * @return
     */
   def open(port: String, baudRate: Int) = Open(port, Some(baudRate),
     Some(DataBits8), Some(NoParity), Some(OneStopBit), Some(NoFlowControl))
 
   /**
     * Java API
-    * @return
     */
   def close() = Close
 
