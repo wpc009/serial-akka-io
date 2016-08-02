@@ -19,7 +19,6 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
   val in = port.getInputStream
   val toNotify = self
 
-
   // override def preStart = {
   port.notifyOnDataAvailable(true)
   port.setInputBufferSize(64)
@@ -39,7 +38,6 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
       @tailrec
       def doRead() {
         val count = in.read(buf, 0, 64)
-        log.debug("read count {}", count)
         if (count > 0) {
           bsb ++= buf.slice(0, count)
           doRead()
@@ -61,7 +59,6 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
       log.debug("event type {}", event.getEventType)
       event.getEventType match {
         case SerialPortEvent.DATA_AVAILABLE =>
-          //            log.debug("doRead")
           toNotify ! read()
         //case SerialPortEvent.PE =>
         //case SerialPortEvent.OE =>

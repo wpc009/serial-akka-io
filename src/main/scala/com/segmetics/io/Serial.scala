@@ -54,7 +54,13 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
                   dataBits: Option[DataBits] = None,
                   parity: Option[Parity] = None,
                   stopBits: Option[StopBits] = None,
-                  flowControl: Option[FlowControl] = None) extends ManagerCommand
+                  flowControl: Option[FlowControl] = None,
+                  timeout: Option[Int] = None) extends ManagerCommand
+
+  case class PureOpen(port: String, baudRate: Option[Int] = None,
+                  dataBits: Option[Int] = None, parity: Option[Int] = None,
+                  stopBits: Option[Int] = None, flowControl:Option[Int] = None,
+                  timout: Option[Int] = None) extends ManagerCommand
 
   /**
     * Serial port is now open.
@@ -130,9 +136,14 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
     * @param port
     * @param baudRate
     */
-  def open(port: String, baudRate: Int) = Open(port, Some(baudRate),
-    Some(DataBits8), Some(NoParity), Some(OneStopBit), Some(NoFlowControl))
+  def open(port: String, baudRate: Int) =
+    Open(port, Some(baudRate), Some(DataBits8), Some(NoParity), Some(OneStopBit), Some(NoFlowControl))
 
+  /**
+    * Java API
+    */
+  def open(port: String, baudRate: Int, dataBits: Int, stopBits: Int, parity: Int, timeout: Int) =
+    PureOpen(port, Some(baudRate), Some(dataBits), Some(parity), Some(stopBits), Some(0), Some(timeout))
   /**
     * Java API
     */
