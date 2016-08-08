@@ -37,3 +37,4 @@ project/plugins/project/
 .idea*
 
 buildinfo.properties
+/bin/

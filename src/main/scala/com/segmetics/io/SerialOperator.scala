@@ -48,13 +48,14 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
       } catch {
         case e: java.io.IOException =>
           log.warning("read serial exception")
+        case e: java.lang.IllegalStateException =>
+          log.error(e, "serial state error")
       }
       val res = bsb.result()
       res
     }
 
     override def serialEvent(event: SerialPortEvent) {
-      log.debug(s"got serial event $event")
       import purejavacomm.SerialPortEvent
       log.debug("event type {}", event.getEventType)
       event.getEventType match {
@@ -69,9 +70,6 @@ private[io] class SerialOperator(port: SerialPort, commander: ActorRef) extends 
     }
   })
   self ! DataAvailable
-
-  //just in case
-  // }
 
   override def receive = {
     case Close =>

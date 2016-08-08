@@ -77,7 +77,7 @@ object SegmetricsBuild extends Build {
     ),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-actor" % akka,
+      "com.typesafe.akka" %% "akka-actor" % akka % Provided,
       "com.typesafe.akka" %% "akka-slf4j" % akka % Provided,
       "ch.qos.logback" % "logback-classic" % "1.0.13" % Provided,
 //      "com.maxtropy" %% "maxtropy-logging" % "0.2.3-Alpha" changing(),
