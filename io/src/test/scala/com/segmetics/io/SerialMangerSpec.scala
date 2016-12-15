@@ -16,9 +16,6 @@ class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
   with ImplicitSender {
 
 
-
-
-
   "Serial" should "list ports" in {
     IO(Serial) ! ListPorts
     val Ports(ports) = expectMsgType[Ports]
@@ -27,17 +24,17 @@ class SerialMangerSpec extends TestKit(ActorSystem("SerialManagerSpec"))
 
   "[Serial] echo test " should "echo back" in {
     val echoWorlds = ByteString("Hello World")
-    IO(Serial) ! Open("/dev/ttyUSB0",Some(9600),Some(DataBits8),Some(NoParity),Some(OneStopBit),Some(NoFlowControl))
-    expectMsgPF(1 seconds){
-      case Opened(op,_) =>
+    IO(Serial) ! Open("/dev/tty.usbserial-DN00MZAW", Some(9600), Some(DataBits8), Some(NoParity), Some(OneStopBit), Some(NoFlowControl))
+    expectMsgPF(10 seconds) {
+      case Opened(op, _) =>
         op ! Write(echoWorlds)
         true
       case _ =>
         false
     }
 
-    expectMsgPF(1 seconds){
-      case Received(data:ByteString) =>
+    expectMsgPF(1 seconds) {
+      case Received(data: ByteString) =>
         data.equals(echoWorlds)
       case _ =>
         false

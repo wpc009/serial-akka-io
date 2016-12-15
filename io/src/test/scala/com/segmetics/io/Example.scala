@@ -49,17 +49,17 @@ class Example(port: String) extends Actor with Stash {
 
 object Example extends App {
 //  val port = "COM4"
-  val port = "/dev/tty.usbserial-FTZAUKLC"
-
-  val system = ActorSystem("Example")
-  val actor = system.actorOf(Props(classOf[Example],port), "e1")
+//  val port = "/dev/tty.usbserial-DN00MZAW"
+//
+//  val system = ActorSystem("Example")
+//  val actor = system.actorOf(Props(classOf[Example],port), "e1")
 
   //The following lines are just for the sake of an example, never program in
   // akka like that.. normally your logic would be embedded in the example
   // actor
-  actor ! "Hi from the computer"
-  Thread.sleep(2000)
-//  actor ! "close"
-
-  system.awaitTermination
+//  actor ! "Hi from the computer"
+//  Thread.sleep(2000)
+////  actor ! "close"
+//
+//  system.awaitTermination
 }
