@@ -36,8 +36,6 @@ private[io] class SerialOperator(port: SerialPort,
   }
 
   port.addEventListener(new SerialPortEventListener() {
-    var pt = 0
-
     override def serialEvent(event: SerialPortEvent) {
       import purejavacomm.SerialPortEvent
       log.debug("event type {}", event.getEventType)
@@ -70,7 +68,9 @@ private[io] class SerialOperator(port: SerialPort,
 }
 
 private[io] object SerialOperator {
-  def props(port: SerialPort, commander: ActorRef) = props(port, commander, new DefaultHandler)
+//  def props(port: SerialPort, commander: ActorRef): Props =
+//    props(port, commander, new DefaultHandler)
 
-  def props(port: SerialPort, commander: ActorRef, handler: HandlerAdapter) = Props(classOf[SerialOperator], port, commander, handler)
+  def props(port: SerialPort, commander: ActorRef, handler: HandlerAdapter): Props =
+    Props(classOf[SerialOperator], port, commander, handler)
 }

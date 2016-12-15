@@ -1,15 +1,18 @@
 package com.segmetics.io
 
-import akka.actor.{ ActorLogging,Actor}
+import akka.actor.{Actor, ActorLogging}
 import com.segmetics.io.Serial._
-import purejavacomm.{PureJavaSerialPort, SerialPort, CommPortIdentifier}
+import purejavacomm.{CommPortIdentifier, PureJavaSerialPort, SerialPort}
+
 import scala.collection.mutable.ArrayBuffer
 import com.segmetics.io.Serial.{Open, PureOpen}
-import scala.util.{Try,Success,Failure}
+import com.segmetics.io.handler.HandlerAdapter
+
+import scala.util.{Failure, Success, Try}
 /**
  * Created by wysa on 14-3-25.
  */
-private[io] class SerialManager extends Actor with ActorLogging{
+private[io] class SerialManager(val handler: HandlerAdapter) extends Actor with ActorLogging{
 
   def openSerial(c: PureOpen) = {
     Try {
@@ -36,7 +39,7 @@ private[io] class SerialManager extends Actor with ActorLogging{
       }
     } match {
       case Success(serialPort) =>
-      val operator = context.actorOf(SerialOperator.props(serialPort, sender()))
+      val operator = context.actorOf(SerialOperator.props(serialPort, sender(), handler))
       sender ! Opened(operator, c.port)
       case Failure(error) =>
       sender ! CommandFailed(c, error)
