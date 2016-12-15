@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
 /**
   * Created by wysa on 14-3-25.
   */
-private[io] class SerialManager(val handler: HandlerAdapter) extends Actor with ActorLogging {
+private[io] class SerialManager extends Actor with ActorLogging {
 
   def openSerial(c: PureOpen) = {
     Try {
