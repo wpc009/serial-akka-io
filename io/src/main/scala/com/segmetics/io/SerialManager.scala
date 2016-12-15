@@ -9,54 +9,55 @@ import com.segmetics.io.Serial.{Open, PureOpen}
 import com.segmetics.io.handler.HandlerAdapter
 
 import scala.util.{Failure, Success, Try}
+
 /**
- * Created by wysa on 14-3-25.
- */
-private[io] class SerialManager(val handler: HandlerAdapter) extends Actor with ActorLogging{
+  * Created by wysa on 14-3-25.
+  */
+private[io] class SerialManager(val handler: HandlerAdapter) extends Actor with ActorLogging {
 
   def openSerial(c: PureOpen) = {
     Try {
       c match {
-        case PureOpen(port, baudRate, data, par, stop, fc, timeout) =>
+        case PureOpen(port, baudRate, data, par, stop, fc, timeout, _) =>
           val id = CommPortIdentifier.getPortIdentifier(port)
           id.open(context.self.toString, 2000) match {
             case sp: PureJavaSerialPort =>
-            log.debug("open port {} succeed, settings params",port)
-            if(baudRate.nonEmpty&&data.nonEmpty&&stop.nonEmpty&&par.nonEmpty){
-              sp.setSerialPortParams(baudRate.get, data.get, stop.get, par.get)
-            }
-            // sp.setSerialPortParams(baudRate, data, stop, par)
-            sp.notifyOnBreakInterrupt(true)
-            val receiveTimeout = timeout.getOrElse(50)
-            sp.enableReceiveTimeout(receiveTimeout)
-            //            sp.enableReceiveFraming(50)
-            if(fc.nonEmpty){
-              sp.setFlowControlMode(fc.get)
-            }
-            sp
+              log.debug("open port {} succeed, settings params", port)
+              if (baudRate.nonEmpty && data.nonEmpty && stop.nonEmpty && par.nonEmpty) {
+                sp.setSerialPortParams(baudRate.get, data.get, stop.get, par.get)
+              }
+              // sp.setSerialPortParams(baudRate, data, stop, par)
+              sp.notifyOnBreakInterrupt(true)
+              val receiveTimeout = timeout.getOrElse(50)
+              sp.enableReceiveTimeout(receiveTimeout)
+              //            sp.enableReceiveFraming(50)
+              if (fc.nonEmpty) {
+                sp.setFlowControlMode(fc.get)
+              }
+              sp
             case _ => throw new RuntimeException(s"$port is not a SerialPort.")
           }
       }
     } match {
       case Success(serialPort) =>
-      val operator = context.actorOf(SerialOperator.props(serialPort, sender(), handler))
-      sender ! Opened(operator, c.port)
+        val operator = context.actorOf(SerialOperator.props(serialPort, sender(), c.handler))
+        sender ! Opened(operator, c.port)
       case Failure(error) =>
-      sender ! CommandFailed(c, error)
+        sender ! CommandFailed(c, error)
     }
   }
 
   def receive = {
     case ListPorts =>
-      val ids= CommPortIdentifier.getPortIdentifiers().asInstanceOf[java.util.Enumeration[CommPortIdentifier]]
+      val ids = CommPortIdentifier.getPortIdentifiers().asInstanceOf[java.util.Enumeration[CommPortIdentifier]]
       val builder = new ArrayBuffer[String]()
-      while(ids.hasMoreElements){
+      while (ids.hasMoreElements) {
         builder += ids.nextElement().getName
       }
       sender ! builder.toVector
     case c: PureOpen =>
       openSerial(c)
-    case c @ Open(port,baudRate,dataBits,parity,stopBits,flowControl,timeout) =>
+    case c@Open(port, baudRate, dataBits, parity, stopBits, flowControl, timeout) =>
       import purejavacomm.SerialPort._
       val data = dataBits map {
         case DataBits5 => DATABITS_5

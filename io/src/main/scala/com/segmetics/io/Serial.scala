@@ -3,7 +3,6 @@ package com.segmetics.io
 import akka.actor._
 import akka.io.IO.Extension
 import akka.util.ByteString
-import com.segmetics.io.Serial.Open
 import com.segmetics.io.handler.{DefaultHandler, HandlerAdapter}
 
 /**
@@ -59,9 +58,9 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
                   timeout: Option[Int] = None) extends ManagerCommand
 
   case class PureOpen(port: String, baudRate: Option[Int] = None,
-                      dataBits: Option[Int] = None, parity: Option[Int] = None,
-                      stopBits: Option[Int] = None, flowControl: Option[Int] = None,
-                      timout: Option[Int] = None) extends ManagerCommand
+                  dataBits: Option[Int] = None, parity: Option[Int] = None,
+                  stopBits: Option[Int] = None, flowControl:Option[Int] = None,
+                  timeout: Option[Int] = None, handler: HandlerAdapter = new DefaultHandler) extends ManagerCommand
 
   /**
     * Serial port is now open.
@@ -134,7 +133,6 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
 
   /**
     * Java API
-    *
     * @param port
     * @param baudRate
     */
@@ -150,11 +148,15 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
   /**
     * Java API
     */
+  def open(port: String, baudRate: Int, dataBits: Int, stopBits: Int, parity: Int, timeout: Int, handler: HandlerAdapter) =
+    PureOpen(port, Some(baudRate), Some(dataBits), Some(parity), Some(stopBits), Some(0), Some(timeout), handler)
+  /**
+    * Java API
+    */
   def close() = Close
 
   /**
     * Java API
-    *
     * @param bytes
     * @return
     */
@@ -165,7 +167,5 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
 
 class SerialExt(system: ExtendedActorSystem) extends Extension {
 
-  def manager = manager(new DefaultHandler)
-
-  def manager(handler: HandlerAdapter) = system.actorOf(Props(classOf[SerialManager], handler), "IO-Serial")
+  lazy val manager = system.actorOf(Props[SerialManager], "IO-Serial")
 }
