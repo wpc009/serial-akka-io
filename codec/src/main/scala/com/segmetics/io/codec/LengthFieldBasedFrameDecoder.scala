@@ -3,6 +3,7 @@ package com.segmetics.io.codec
 import java.nio.ByteOrder
 
 import akka.util.ByteString
+import com.segmetics.io.handler.ChannelContext
 import io.netty.buffer.ByteBuf
 
 /**
@@ -13,7 +14,8 @@ class LengthFieldBasedFrameDecoder(val maxFrameLength: Int,
                                    val lengthFieldLength: Int,
                                    val lengthAdjustment: Int,
                                    val initialBytesToStrip: Int,
-                                   val endian: ByteOrder = ByteOrder.BIG_ENDIAN) extends ByteToMessageDecoder {
+                                   val endian: ByteOrder = ByteOrder.BIG_ENDIAN,
+                                   val keepDiscarding: Boolean = true) extends ByteToMessageDecoder {
 
   val lengthFieldEndOffset = lengthFieldOffset + lengthFieldLength
 
@@ -27,6 +29,9 @@ class LengthFieldBasedFrameDecoder(val maxFrameLength: Int,
   def this(maxFrameLength: Int, lengthFieldOffset: Int, lengthFieldLength: Int, adjustment: Int) =
     this(maxFrameLength, lengthFieldOffset, lengthFieldLength, adjustment, 0)
 
+  def this(maxFrameLength: Int, lengthFieldOffset: Int, lengthFieldLength: Int, adjustment: Int, keep: Boolean) =
+    this(maxFrameLength, lengthFieldOffset, lengthFieldLength, adjustment, 0, ByteOrder.BIG_ENDIAN, keep)
+
 
   override def decode(in: ByteBuf, out: java.util.List[Any]): Unit = {
     val frame = decode(in)
@@ -39,10 +44,9 @@ class LengthFieldBasedFrameDecoder(val maxFrameLength: Int,
     })
   }
 
-
   protected def decode(in: ByteBuf): Option[ByteBuf] = {
 //    log.debug("in is {} {}", util.Arrays.toString(in.array()), in.readerIndex())
-    if (discardingTooLongFrame) {
+    if (discardingTooLongFrame && keepDiscarding) {
       var bytesToDiscard = this.bytesToDiscard
       val localBytesToDiscard = Math.min(bytesToDiscard, in.readableBytes).toInt
       in.skipBytes(localBytesToDiscard)

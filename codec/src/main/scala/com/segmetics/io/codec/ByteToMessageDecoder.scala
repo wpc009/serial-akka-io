@@ -2,7 +2,6 @@ package com.segmetics.io.codec
 
 import java.util
 
-import akka.event.{LoggingAdapter, NoLogging}
 import com.segmetics.io.handler.{ChannelContext, HandlerAdapter}
 import io.netty.buffer.{ByteBuf, Unpooled}
 
@@ -27,6 +26,7 @@ trait ByteToMessageDecoder extends HandlerAdapter {
     @tailrec
     def doRead() {
       val count = buf.writeBytes(in, 64)
+      log.debug(s"count is $count")
       if (count > 0) {
         doRead()
       }

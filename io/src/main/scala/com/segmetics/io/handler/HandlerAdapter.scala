@@ -11,9 +11,10 @@ trait HandlerAdapter {
 
   var log: LoggingAdapter = NoLogging
 
-  def setLogger(log: LoggingAdapter) = this.log = log
+  def setLogger(log: LoggingAdapter): Unit = this.log = log
 
   def channelRead(ctx: ChannelContext)
+
 }
 
 trait ChannelContext {

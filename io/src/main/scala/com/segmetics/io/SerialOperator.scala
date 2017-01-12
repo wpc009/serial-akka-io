@@ -18,6 +18,7 @@ private[io] class SerialOperator(port: SerialPort,
   val out = port.getOutputStream
 
   context.watch(commander)
+  handler.setLogger(log)
 
   val channelContext = new ChannelContext {
     override def fireRead(msg: Any): Unit = self ! msg
@@ -30,7 +31,7 @@ private[io] class SerialOperator(port: SerialPort,
   port.enableReceiveTimeout(1)
 
   override def postStop = {
-    log.info(s"serialport ${port} close")
+    log.info(s"serial port ${port} close")
     commander ! ConfirmedClose
     port.close()
   }
@@ -68,9 +69,6 @@ private[io] class SerialOperator(port: SerialPort,
 }
 
 private[io] object SerialOperator {
-//  def props(port: SerialPort, commander: ActorRef): Props =
-//    props(port, commander, new DefaultHandler)
-
   def props(port: SerialPort, commander: ActorRef, handler: HandlerAdapter): Props =
     Props(classOf[SerialOperator], port, commander, handler)
 }
