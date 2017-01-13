@@ -14,7 +14,7 @@ import scala.annotation.tailrec
 class DefaultHandler extends HandlerAdapter {
 
   override def channelRead(ctx: ChannelContext): Unit = {
-    ctx.fireRead(ctx.inputStream())
+    ctx.fireRead(read(ctx.inputStream()))
   }
 
   private def read(in: InputStream) = {
