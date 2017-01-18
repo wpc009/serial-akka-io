@@ -7,7 +7,7 @@ import com.typesafe.sbt.git.DefaultReadableGit
 import sbt.{Credentials, _}
 import sbt.Keys._
 
-object SegmetricsBuild extends Build {
+object SegmeticsBuild extends Build {
 
   val akka = "2.3.10"
 

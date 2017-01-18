@@ -15,6 +15,8 @@ trait HandlerAdapter {
 
   def channelRead(ctx: ChannelContext)
 
+  def channelReset(ctx: ChannelContext): Unit = {}
+
 }
 
 trait ChannelContext {

@@ -56,10 +56,14 @@ private[io] class SerialOperator(port: SerialPort,
       if (sender != commander) sender ! ConfirmedClose
       context.stop(self)
 
-    case Write(data, ack) =>
+    case Write(data, ack, reset) =>
       out.write(data.toArray)
       out.flush()
       if (ack != NoAck) sender ! ack
+      if (reset) handler.channelReset(channelContext)
+
+    case Reset =>
+      handler.channelReset(channelContext)
 
     case data: ByteString =>
       log.debug("got input {}", data)

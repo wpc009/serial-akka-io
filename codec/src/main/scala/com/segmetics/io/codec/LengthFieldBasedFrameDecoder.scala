@@ -45,7 +45,6 @@ class LengthFieldBasedFrameDecoder(val maxFrameLength: Int,
   }
 
   protected def decode(in: ByteBuf): Option[ByteBuf] = {
-//    log.debug("in is {} {}", util.Arrays.toString(in.array()), in.readerIndex())
     if (discardingTooLongFrame && keepDiscarding) {
       var bytesToDiscard = this.bytesToDiscard
       val localBytesToDiscard = Math.min(bytesToDiscard, in.readableBytes).toInt

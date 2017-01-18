@@ -77,7 +77,9 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
   case class Received(data: ByteString) extends Event
 
   /** Write data on the serial port. Response: ack (if ack != NoAck) */
-  case class Write(data: ByteString, ack: AckEvent = NoAck) extends OperatorCommand
+  case class Write(data: ByteString, ack: AckEvent = NoAck, resetCumulation: Boolean = false) extends OperatorCommand
+
+  case object Reset extends OperatorCommand
 
   object DataBits8 extends DataBits
 
@@ -165,6 +167,13 @@ object Serial extends ExtensionId[SerialExt] with ExtensionIdProvider {
     */
   def write(bytes: ByteString) = Write(bytes)
 
+  def write(bytes: ByteString, reset: Boolean) = Write(bytes, NoAck, reset)
+
+  /**
+    * Java API
+    * @return
+    */
+  def reset() = Reset
 }
 
 

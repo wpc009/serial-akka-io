@@ -18,9 +18,7 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
     val decoder = new LengthFieldBasedFrameDecoder(200, 2, 2)
     val context = new MyContext
     decoder.channelRead(context)
-    context.msg should be(ByteString(Array(0.toByte, 3.toByte, 0.toByte, 5.toByte,
-      1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte)))
-
+    context.msg should be(ByteString(Array(0.toByte, 3.toByte, 0.toByte, 5.toByte, 1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte)))
   }
 
   it should "offset 0" in {

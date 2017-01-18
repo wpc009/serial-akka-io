@@ -16,6 +16,7 @@ trait ByteToMessageDecoder extends HandlerAdapter {
   var first: Boolean = false
   var numReads = 0
   var discardAfterReads = 16
+  var forceFirst = false
 
   def setDiscardAfterReads(discard: Int) = discardAfterReads = discard
 
@@ -42,6 +43,11 @@ trait ByteToMessageDecoder extends HandlerAdapter {
     }
     val out = CodecOutputList.newInstance
     try {
+      if (forceFirst && cumulation != null) {
+        cumulation.release
+        cumulation = null
+        forceFirst = false
+      }
       first = cumulation == null
       if (first) cumulation = buf
       else cumulation.writeBytes(buf)
@@ -64,6 +70,11 @@ trait ByteToMessageDecoder extends HandlerAdapter {
       }
       out.recycle()
     }
+  }
+
+
+  override def channelReset(ctx: ChannelContext): Unit = {
+    forceFirst = true
   }
 
   protected def discardSomeReadBytes() {
