@@ -16,21 +16,21 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
 
   "length based " should "offset 2" in {
     val decoder = new LengthFieldBasedFrameDecoder(200, 2, 2)
-    val context = new MyContext
+    val context = new MockContext
     decoder.channelRead(context)
     context.msg should be(ByteString(Array(0.toByte, 3.toByte, 0.toByte, 5.toByte, 1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte)))
   }
 
   it should "offset 0" in {
     val decoder2 = new LengthFieldBasedFrameDecoder(200, 0, 2)
-    val context = new MyContext
+    val context = new MockContext
     decoder2.channelRead(context)
     context.msg should be(ByteString(Array(0.toByte, 3.toByte, 0.toByte, 5.toByte, 1.toByte)))
   }
 
   it should "adjust 3" in {
     val decoder = new LengthFieldBasedFrameDecoder(200, 0, 2, 3)
-    val context = new MyContext
+    val context = new MockContext
     decoder.channelRead(context)
     context.msg should be(ByteString(Array(0.toByte, 3.toByte, 0.toByte, 5.toByte,
       1.toByte, 2.toByte, 3.toByte, 4.toByte)))
@@ -38,7 +38,7 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
 
   it should "strip 2 and offset 2 and adjust -1" in {
     val decoder = new LengthFieldBasedFrameDecoder(200, 2, 2, -1, 2)
-    val context = new MyContext
+    val context = new MockContext
     decoder.channelRead(context)
     context.msg should be(ByteString(Array(0.toByte, 5.toByte,
       1.toByte, 2.toByte, 3.toByte, 4.toByte)))
@@ -69,47 +69,7 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
     context.msg should be(ByteString(Array(4.toByte, 5.toByte)))
   }
 
-  class MyContext extends ChannelContext {
-
-    val streams: List[InputStream] = List(
-      new InputStream {
-        val buffer = List(0.toByte, 3.toByte, 0.toByte, 5.toByte,
-          1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte)
-        var index = 0
-
-        override def read() = {
-          if (index >= buffer.length) -1
-          else {
-            val rst = buffer(index)
-            index += 1
-            rst
-          }
-        }
-      }
-    )
-
-    val emptyStream = new InputStream {
-      override def read() = -1
-    }
-    var index = 0
-    var msg: Any = 0
-
-    override def fireRead(msg: Any) = {
-      this.msg = msg
-    }
-
-    override def inputStream() = {
-      if (index >= streams.length) {
-        emptyStream
-      } else {
-        val s = streams(index)
-        index += 1
-        s
-      }
-    }
-  }
-
-  class MyContext2 extends MyContext {
+  class MyContext2 extends MockContext {
     override val streams: List[InputStream] = List(
       new InputStream {
         val buffer = List(0.toByte, 3.toByte, 0.toByte, 5.toByte)
@@ -140,7 +100,7 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
     )
   }
 
-  class MyContext3 extends MyContext {
+  class MyContext3 extends MockContext {
     override val streams: List[InputStream] = List(
       new InputStream {
         val buffer = List(0.toByte, 3.toByte, 1.toByte, 2.toByte, 3.toByte, 0.toByte, 2.toByte, 4.toByte, 5.toByte, 6.toByte)

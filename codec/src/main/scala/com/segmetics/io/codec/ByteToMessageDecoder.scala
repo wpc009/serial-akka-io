@@ -2,6 +2,7 @@ package com.segmetics.io.codec
 
 import java.util
 
+import akka.util.ByteString
 import com.segmetics.io.handler.{ChannelContext, HandlerAdapter}
 import io.netty.buffer.{ByteBuf, Unpooled}
 
@@ -44,6 +45,10 @@ trait ByteToMessageDecoder extends HandlerAdapter {
     val out = CodecOutputList.newInstance
     try {
       if (forceFirst && cumulation != null) {
+        val bs = Array.ofDim[Byte](cumulation.readableBytes())
+        val readerIndex = cumulation.readerIndex()
+        cumulation.getBytes(readerIndex, bs)
+        ctx.fireDiscardBytes(ByteString(bs))
         cumulation.release
         cumulation = null
         forceFirst = false

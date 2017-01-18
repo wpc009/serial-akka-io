@@ -24,6 +24,13 @@ private[io] class SerialOperator(port: SerialPort,
     override def fireRead(msg: Any): Unit = self ! msg
 
     override def inputStream(): InputStream = port.getInputStream
+
+    override def fireDiscardBytes(msg: Any): Unit = msg match {
+      case bs: ByteString =>
+        log.debug("discarded {}", bs)
+        commander ! Discarded(bs)
+      case _ =>
+    }
   }
 
   port.notifyOnDataAvailable(true)

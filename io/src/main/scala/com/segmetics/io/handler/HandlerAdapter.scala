@@ -23,6 +23,8 @@ trait ChannelContext {
 
   def fireRead(msg: Any)
 
+  def fireDiscardBytes(msg: Any)
+
   def inputStream(): InputStream
 
 }

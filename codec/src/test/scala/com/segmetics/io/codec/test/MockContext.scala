@@ -45,4 +45,6 @@ class MockContext extends ChannelContext {
       s
     }
   }
+
+  override def fireDiscardBytes(msg: Any): Unit = println(s"discarded $msg, ${msg.getClass}")
 }
