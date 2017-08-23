@@ -16,7 +16,7 @@ object SegmeticsBuild extends Build {
     organization := "com.segmetics",
     scalaVersion in ThisBuild := "2.11.6",
     exportJars := true,
-    scalacOptions ++= Seq("-target:jvm-1.7", "-feature", "-g:none", "-optimise"),
+    scalacOptions ++= Seq("-target:jvm-1.6", "-feature", "-g:none", "-optimise"),
     git.useGitDescribe := true,
     GitKeys.gitReader in ThisBuild <<= baseDirectory(base => new DefaultReadableGit(base)),
     sourceManaged <<= (baseDirectory in ThisProject) (base => base / "src_managed"),
