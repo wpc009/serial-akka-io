@@ -75,7 +75,7 @@ abstract class ReplayingDecoder[S] protected(var state_ : S) extends ByteToMessa
       }
     } catch {
       case cause: Throwable =>
-        throw new DecoderException(cause)
+        throw new DecoderException("", cause)
     }
   }
 }

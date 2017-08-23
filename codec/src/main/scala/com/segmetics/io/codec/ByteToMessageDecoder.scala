@@ -135,7 +135,7 @@ trait ByteToMessageDecoder extends HandlerAdapter {
       }
     } catch {
       case e: DecoderException => throw e
-      case t: Throwable => throw new DecoderException(t)
+      case t: Throwable => throw new DecoderException("", t)
     }
   }
 
