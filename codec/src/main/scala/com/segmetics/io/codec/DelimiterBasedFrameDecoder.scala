@@ -1,11 +1,12 @@
 package com.segmetics.io.codec
 
 
+import java.nio.ByteBuffer
 import java.util
 
 import akka.util.ByteString
 import com.segmetics.io.handler.ChannelContext
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.{ByteBuf, Unpooled}
 
 
 /**
@@ -122,6 +123,10 @@ class DelimiterBasedFrameDecoder(val maxFrameLength: Int, val stripDelimiter: Bo
     this(maxFrameLength, true, delimiter)
   }
 
+  def this(maxFrameLength: Int, delimiter: Array[Byte]) {
+    this(maxFrameLength, Unpooled.wrappedBuffer(delimiter))
+  }
+
   /**
     * Return {@code true} if the current instance is a subclass of DelimiterBasedFrameDecoder
     */
@@ -130,7 +135,6 @@ class DelimiterBasedFrameDecoder(val maxFrameLength: Int, val stripDelimiter: Bo
   @throws[Exception]
   override final protected def decode(ctx: ChannelContext, in: ByteBuf, out: util.List[Any]): Unit = {
     val decoded = decode(ctx, in)
-    log.debug("decode called, decoded is {}", decoded)
     if (decoded != null) {
       val bs = Array.ofDim[Byte](decoded.readableBytes())
       val readerIndex = decoded.readerIndex()
@@ -159,8 +163,6 @@ class DelimiterBasedFrameDecoder(val maxFrameLength: Int, val stripDelimiter: Bo
         minDelim = delim
       }
     }
-    log.debug("min delim {}", minDelim)
-    log.debug("discard too long {}, too long length {}", discardingTooLongFrame, tooLongFrameLength)
     if (minDelim != null) {
       val minDelimLength = minDelim.capacity
       var frame: ByteBuf = null

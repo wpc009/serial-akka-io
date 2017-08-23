@@ -14,7 +14,7 @@ class DelimiterDecoderSpec extends FlatSpec with Matchers {
   val system = ActorSystem("abc")
 
   "delimiter decoder" should "simple" in {
-    val decoder = new DelimiterBasedFrameDecoder(200, Unpooled.wrappedBuffer(Array('*'.toByte, '\r'.toByte)))
+    val decoder = new DelimiterBasedFrameDecoder(200, Array('*'.toByte, '\r'.toByte))
     decoder.setLogger(Logging(system, "simple"))
     val context = new MyContext3
     decoder.channelRead(context)
@@ -22,7 +22,7 @@ class DelimiterDecoderSpec extends FlatSpec with Matchers {
   }
 
   it should "partial" in {
-    val decoder = new DelimiterBasedFrameDecoder(200, Unpooled.wrappedBuffer(Array('*'.toByte, '\r'.toByte)))
+    val decoder = new DelimiterBasedFrameDecoder(200, Array('*'.toByte, '\r'.toByte))
     decoder.setLogger(Logging(system, "partial"))
     val context = new MyContext2
     decoder.channelRead(context)
