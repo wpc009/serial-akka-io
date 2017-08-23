@@ -33,7 +33,7 @@ class LengthFieldBasedFrameDecoder(val maxFrameLength: Int,
     this(maxFrameLength, lengthFieldOffset, lengthFieldLength, adjustment, 0, ByteOrder.BIG_ENDIAN, keep)
 
 
-  override def decode(in: ByteBuf, out: java.util.List[Any]): Unit = {
+  override def decode(ctx: ChannelContext, in: ByteBuf, out: java.util.List[Any]): Unit = {
     val frame = decode(in)
     log.debug("frame is {}", frame)
     frame.foreach(buf => {

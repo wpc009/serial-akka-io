@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.util.ByteString
 import com.segmetics.io.codec.LengthFieldBasedFrameDecoder
-import com.segmetics.io.handler.ChannelContext
 import org.scalatest._
 
 /**
@@ -14,7 +13,7 @@ import org.scalatest._
   */
 class BasicLengthCodecSpec extends FlatSpec with Matchers {
 
-  "length based " should "offset 2" in {
+  "length based" should "offset 2" in {
     val decoder = new LengthFieldBasedFrameDecoder(200, 2, 2)
     val context = new MockContext
     decoder.channelRead(context)
@@ -49,10 +48,10 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
   it should "packet slicing" in {
     val decoder = new LengthFieldBasedFrameDecoder(200, 2, 2, -1, 2)
     val context = new MyContext2
-//    decoder.setLogger(Logging.getLogger(sys, "abc"))
+    //    decoder.setLogger(Logging.getLogger(sys, "abc"))
 
     decoder.channelRead(context)
-    context.msg should be (0)
+    context.msg should be(0)
     decoder.channelRead(context)
     context.msg should be(ByteString(Array(0.toByte, 5.toByte,
       1.toByte, 2.toByte, 3.toByte, 4.toByte)))
@@ -64,9 +63,9 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
     decoder.setLogger(Logging.getLogger(sys, "abc"))
 
     decoder.channelRead(context)
-    context.msg should be(ByteString(Array(1.toByte, 2.toByte, 3.toByte)))
-    decoder.channelRead(context)
-    context.msg should be(ByteString(Array(4.toByte, 5.toByte)))
+    context.reads.get(0) should be(ByteString(Array(1.toByte, 2.toByte, 3.toByte)))
+//    decoder.channelRead(context)
+    context.reads.get(1) should be(ByteString(Array(4.toByte, 5.toByte)))
   }
 
   class MyContext2 extends MockContext {
@@ -101,6 +100,11 @@ class BasicLengthCodecSpec extends FlatSpec with Matchers {
   }
 
   class MyContext3 extends MockContext {
+
+    val reads = new java.util.ArrayList[Any]()
+
+    override def fireRead(msg: Any): Unit = reads.add(msg)
+
     override val streams: List[InputStream] = List(
       new InputStream {
         val buffer = List(0.toByte, 3.toByte, 1.toByte, 2.toByte, 3.toByte, 0.toByte, 2.toByte, 4.toByte, 5.toByte, 6.toByte)
